@@ -57,7 +57,7 @@ tickers, period = render_topbar()
 ticker = tickers[0] if tickers else "COMI.CA"
 
 # ── Tabs ──────────────────────────────────────────────────────────────────────
-tab_analysis, tab_scanner = st.tabs(["📈  Stock Analysis", "🔍  Market Scanner"])
+tab_scanner, tab_analysis = st.tabs(["🔍  Market Scanner", "📈  Stock Analysis"])
 
 # ══════════════════════════════════════════════════════════════════════════════
 # Tab 1 — Stock Analysis
