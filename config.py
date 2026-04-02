@@ -292,6 +292,7 @@ details summary {{ color: {YELLOW} !important; font-weight: 600; }}
     .kpi-grid {{ grid-template-columns: repeat(2, 1fr); }}
 }}
 @media (max-width: 640px) {{
+    .block-container {{ padding-top: 1rem !important; }}
     .kpi-grid {{ grid-template-columns: repeat(2, 1fr); gap: 10px; }}
     .kpi-card {{ padding: 12px 14px; }}
     .kpi-value {{ font-size: 1.1rem; }}
@@ -304,6 +305,10 @@ details summary {{ color: {YELLOW} !important; font-weight: 600; }}
     .signal-block {{ padding: 14px; }}
     .signal-why {{ font-size: 0.82rem; }}
     h2 {{ font-size: 1.15rem !important; }}
+    
+    /* ── Dataframe on mobile ── */
+    [data-testid="stDataFrame"] {{ font-size: 0.75rem !important; }}
+    [data-testid="stDataFrame"] table {{ font-size: 0.75rem !important; }}
 
 }}
 </style>

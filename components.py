@@ -17,57 +17,99 @@ from config import YELLOW, GOLD, DARK_BG, CARD_BG, TEXT, DARK_RED, DARK_GREEN
 
 # ─── Sidebar ──────────────────────────────────────────────────────────────────
 
-_EGX_TICKERS = [
+_EGX_TICKERS = {
     # Banking
-    "COMI.CA", "QNBA.CA", "ADIB.CA", "AAIB.CA", "AIBK.CA", "ALEX.CA",
+    "COMI.CA": "Commercial International Bank (CIB)",
+    "QNBA.CA": "Qatar National Bank Alahli (QNB)",
+    "ADIB.CA": "Abu Dhabi Islamic Bank",
+    "AAIB.CA": "Arab African International Bank",
+    "AIBK.CA": "Arab Investment Bank",
+    "ALEX.CA": "Bank of Alexandria",
     # Real Estate
-    "TMGH.CA", "PHDC.CA", "MNHD.CA", "OCDI.CA", "HELI.CA",
+    "TMGH.CA": "Talaat Moustafa Group",
+    "PHDC.CA": "Palm Hills Developments",
+    "MNHD.CA": "Madinet Nasr Housing",
+    "OCDI.CA": "Orascom Development Egypt",
+    "HELI.CA": "Heliopolis Housing",
     # Telecom & Tech
-    "ETEL.CA", "SWDY.CA",
+    "ETEL.CA": "Egyptian Company for Mobile Services (Etisalat)",
+    "SWDY.CA": "Sidi Kerir Petrochemicals (Sidpec)",
     # Energy & Utilities
-    "AMOC.CA", "EGTS.CA",
+    "AMOC.CA": "Alexandria Mineral Oils Company",
+    "EGTS.CA": "Egyptian Gas",
     # Food & Consumer
-    "JUFO.CA", "DOMN.CA", "CLHO.CA", "EDBE.CA",
+    "JUFO.CA": "Juhayna Food Industries",
+    "DOMN.CA": "Domty",
+    "CLHO.CA": "Cairo for Hotels",
+    "EDBE.CA": "Edita Food Industries",
     # Industrial & Diversified
-    "ACGC.CA", "EKHO.CA", "HRHO.CA", "EFIH.CA", "ORWE.CA",
-    "ABUK.CA", "EAST.CA", "SKPC.CA", "MFPC.CA", "IRON.CA",
-]
+    "ACGC.CA": "Arabian Cement Company",
+    "EKHO.CA": "El Kahera Housing",
+    "HRHO.CA": "Helwan Housing",
+    "EFIH.CA": "Egyptian Financial Group",
+    "ORWE.CA": "Oriental Weavers",
+    "ABUK.CA": "Abu Kir Fertilizers",
+    "EAST.CA": "Eastern Company",
+    "SKPC.CA": "Suez Cement",
+    "MFPC.CA": "Misr Fertilizers Production Company",
+    "IRON.CA": "Egyptian Iron & Steel",
+}
 
 _PERIOD_LABELS = {
     "3mo": "3M", "6mo": "6M", "1y": "1Y", "2y": "2Y", "5y": "5Y",
 }
 
 
-def render_topbar() -> tuple[list, str, bool]:
+def render_topbar() -> tuple[list, str]:
     """
     Inline control bar at the top of the main page.
-    Returns (tickers, period, refresh_clicked).
+    Returns (tickers, period).
     """
-    # Row 1: brand (full width on mobile)
-    st.markdown(
-        f"<div style='padding-top:4px; margin-bottom:8px;'>"
-        f"<span style='color:{YELLOW}; font-size:1.15rem; font-weight:800; "
-        f"letter-spacing:-.02em;'>📊 Thndr Guide</span>"
-        f"<span style='color:#999; font-size:0.7rem; margin-left:10px;'>"
-        f"EGX Investment Companion</span>"
-        f"</div>",
-        unsafe_allow_html=True,
-    )
-
-    # Row 2: ticker selector + refresh button
-    c_ticker, c_refresh = st.columns([3, 1])
-    with c_ticker:
-        tickers = st.multiselect(
-            "Tickers",
-            options=_EGX_TICKERS,
-            default=["COMI.CA"],
-            placeholder="Select EGX tickers…",
-            label_visibility="collapsed",
-            help="First selected ticker drives the Stock Analysis tab. "
-                 "All selected tickers appear in the Market Scanner.",
+    # Row 1: brand + last update indicator
+    c_brand, c_update = st.columns([3, 1])
+    with c_brand:
+        st.markdown(
+            f"<div style='padding-top:0px; margin-bottom:8px;'>"
+            f"<span style='color:{YELLOW}; font-size:1.15rem; font-weight:800; "
+            f"letter-spacing:-.02em;'>📊 Thndr Guide</span>"
+            f"<span style='color:#999; font-size:0.7rem; margin-left:10px;'>"
+            f"EGX Investment Companion</span>"
+            f"</div>",
+            unsafe_allow_html=True,
         )
-    with c_refresh:
-        refresh = st.button("🔄 Refresh", type="secondary", use_container_width=True)
+    with c_update:
+        # Get time since last refresh from session state
+        import time
+        if "last_refresh" in st.session_state:
+            time_since = time.time() - st.session_state.last_refresh
+            minutes = int(time_since / 60)
+            seconds = int(time_since % 60)
+            if minutes > 0:
+                time_text = f"{minutes}m ago"
+            else:
+                time_text = f"{seconds}s ago"
+        else:
+            time_text = "Just now"
+        
+        st.markdown(
+            f"<div style='text-align:right; padding-top:4px;'>"
+            f"<span style='color:#666; font-size:0.7rem;'>🔄 Updated</span><br>"
+            f"<span style='color:#999; font-size:0.75rem; font-weight:600;'>{time_text}</span>"
+            f"</div>",
+            unsafe_allow_html=True,
+        )
+
+    # Row 2: ticker selector (full width)
+    tickers = st.multiselect(
+        "Tickers",
+        options=list(_EGX_TICKERS.keys()),
+        default=["COMI.CA"],
+        format_func=lambda x: f"{_EGX_TICKERS[x]} ({x.replace('.CA', '')})",
+        placeholder="Select EGX tickers…",
+        label_visibility="collapsed",
+        help="First selected ticker drives the Stock Analysis tab. "
+             "All selected tickers appear in the Market Scanner.",
+    )
 
     # Row 3: period dropdown
     period = st.selectbox(
@@ -82,7 +124,7 @@ def render_topbar() -> tuple[list, str, bool]:
         "<hr style='margin:8px 0 16px 0; border-color:#23262f; opacity:1;'>",
         unsafe_allow_html=True,
     )
-    return tickers, period, refresh
+    return tickers, period
 
 
 # ─── Page Header ──────────────────────────────────────────────────────────────
@@ -451,16 +493,14 @@ def _format_avg_volume(value) -> str:
 
 def render_market_scanner(rows: list) -> None:
     """Comparison table. Yellow-highlighted rows = RSI < 35 (oversold)."""
-    col_left, col_right = st.columns([3, 1])
-    with col_left:
-        st.markdown(
-            f"<p style='color:#888; font-size:0.82rem; margin:0;'>"
-            f"Comparing {len(rows)} ticker(s) &nbsp;·&nbsp; "
-            f"<span style='background:rgba(255,215,0,.15); color:{YELLOW}; "
-            f"padding:2px 8px; border-radius:8px; font-weight:700;'>Yellow</span>"
-            f" = RSI &lt; 35 (potential oversold opportunity)</p>",
-            unsafe_allow_html=True,
-        )
+    st.markdown(
+        f"<p style='color:#888; font-size:0.82rem; margin:0 0 12px 0;'>"
+        f"Comparing {len(rows)} ticker(s) &nbsp;·&nbsp; "
+        f"<span style='background:rgba(255,215,0,.15); color:{YELLOW}; "
+        f"padding:2px 8px; border-radius:8px; font-weight:700; font-size:0.75rem;'>Yellow</span>"
+        f" = RSI &lt; 35</p>",
+        unsafe_allow_html=True,
+    )
 
     if not rows:
         st.info("Select at least one ticker in the sidebar.")
@@ -477,7 +517,7 @@ def render_market_scanner(rows: list) -> None:
         return [""] * len(row)
 
     styled = df_display.style.apply(_highlight, axis=1)
-    st.dataframe(styled, width='stretch', hide_index=True)
+    st.dataframe(styled, use_container_width=True, hide_index=True)
 
 
 # ─── Footer Disclaimer ────────────────────────────────────────────────────────
