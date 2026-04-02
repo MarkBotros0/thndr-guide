@@ -44,7 +44,7 @@ def render_topbar() -> tuple[list, str, bool]:
     Returns (tickers, period, refresh_clicked).
     """
     # Row 1: brand + refresh button
-    c_brand, c_btn = st.columns([5, 0.7])
+    c_brand, c_btn = st.columns([4.5, 1.2])
     with c_brand:
         st.markdown(
             f"<div style='padding-top:4px;'>"
@@ -56,7 +56,7 @@ def render_topbar() -> tuple[list, str, bool]:
             unsafe_allow_html=True,
         )
     with c_btn:
-        refresh = st.button("🔄", width='stretch', help="Refresh data")
+        refresh = st.button("🔄 Refresh Data", type="secondary", use_container_width=True)
 
     # Row 2: ticker selector (full width)
     tickers = st.multiselect(
