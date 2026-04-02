@@ -377,7 +377,7 @@ def _apply_dark_layout(fig: go.Figure, ticker: str) -> None:
         margin=dict(l=10, r=10, t=36, b=10),
     )
     fig.update_yaxes(
-        title_font=dict(color="#888"), tickfont=dict(color="#888"),
+        title=dict(font=dict(color="#888")), tickfont=dict(color="#888"),
         gridcolor="#1e2128", zeroline=False,
     )
     fig.update_xaxes(tickfont=dict(color="#888"), gridcolor="#1e2128")
