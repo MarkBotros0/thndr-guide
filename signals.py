@@ -43,27 +43,30 @@ def _explain_neutral(price, rsi, sma50, sma200) -> str:
 
 def get_signal(price: float, rsi: float, sma50: float, sma200: float) -> tuple:
     """
-    Evaluate technical conditions and return a (label, emoji, color, explanation) tuple.
+    Evaluate technical conditions and return a (label, emoji, color, explanation, recommendation) tuple.
 
     Rules (evaluated in priority order):
       1. STRONG BUY  — RSI < 35  AND  price within ±5% of SMA-200
       2. CAUTION     — RSI > 70
       3. HOLD        — price > SMA-50  (neutral RSI)
       4. NEUTRAL     — none of the above
+    
+    Returns: (label, emoji, color, explanation, recommendation)
     """
     if any(np.isnan(v) for v in [rsi, sma50, sma200]):
         return (
             "INSUFFICIENT DATA", "⚪", "#888888",
             "Not enough historical data to generate a reliable signal. "
             "Try selecting a longer time period.",
+            "WAIT"
         )
 
     near_sma200 = abs(price - sma200) / sma200 <= NEAR_SMA200_PCT
 
     if rsi < RSI_OVERSOLD and near_sma200:
-        return ("STRONG BUY",    "🟢", DARK_GREEN, _explain_strong_buy(price, rsi, sma50, sma200))
+        return ("STRONG BUY",    "🟢", DARK_GREEN, _explain_strong_buy(price, rsi, sma50, sma200), "BUY")
     if rsi > RSI_OVERBOUGHT:
-        return ("CAUTION",       "🔴", DARK_RED,   _explain_caution(price, rsi, sma50, sma200))
+        return ("CAUTION",       "🔴", DARK_RED,   _explain_caution(price, rsi, sma50, sma200), "NOT BUY")
     if price > sma50:
-        return ("HOLD",          "🟡", YELLOW,     _explain_hold(price, rsi, sma50, sma200))
-    return     ("NEUTRAL / WATCH","⚪", "#AAAAAA",  _explain_neutral(price, rsi, sma50, sma200))
+        return ("HOLD",          "🟡", YELLOW,     _explain_hold(price, rsi, sma50, sma200), "WAIT")
+    return     ("NEUTRAL / WATCH","⚪", "#AAAAAA",  _explain_neutral(price, rsi, sma50, sma200), "WAIT")

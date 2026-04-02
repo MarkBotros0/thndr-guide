@@ -213,7 +213,7 @@ def render_52week_range(price: float, week52_low: float, week52_high: float) -> 
 
 def render_analysis_box(price: float, rsi: float, sma50: float, sma200: float,
                         signal_label: str, signal_emoji: str,
-                        signal_color: str, explanation: str) -> None:
+                        signal_color: str, explanation: str, recommendation: str) -> None:
 
     rsi_str    = f"{rsi:.1f}"         if not np.isnan(rsi)    else "N/A"
     sma50_str  = f"{sma50:,.2f} EGP"  if not np.isnan(sma50)  else "N/A"
@@ -238,6 +238,17 @@ def render_analysis_box(price: float, rsi: float, sma50: float, sma200: float,
     badge_bg     = _hex_to_rgba(signal_color, 0.10)
     badge_border = _hex_to_rgba(signal_color, 0.30)
 
+    # Recommendation styling
+    if recommendation == "BUY":
+        rec_color = DARK_GREEN
+        rec_emoji = "✅"
+    elif recommendation == "NOT BUY":
+        rec_color = DARK_RED
+        rec_emoji = "🚫"
+    else:  # WAIT
+        rec_color = YELLOW
+        rec_emoji = "⏳"
+
     st.markdown(
         f"""
         <div class="signal-block">
@@ -248,6 +259,13 @@ def render_analysis_box(price: float, rsi: float, sma50: float, sma200: float,
               <div class="signal-title" style="color:{signal_color};">{signal_label}</div>
               <div class="signal-sub">RSI + Moving Average analysis</div>
             </div>
+          </div>
+
+          <div style="text-align:center; margin:1rem 0; padding:0.8rem; background:{_hex_to_rgba(rec_color, 0.15)}; border-radius:8px; border:1px solid {_hex_to_rgba(rec_color, 0.3)};">
+            <span style="font-size:1.1rem;">{rec_emoji}</span>
+            <span style="font-size:1.3rem; font-weight:600; color:{rec_color}; margin-left:0.5rem;">
+              {recommendation}
+            </span>
           </div>
 
           <div class="indicator-row">

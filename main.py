@@ -77,8 +77,8 @@ with tab_analysis:
     render_metrics(price, daily_change, rsi, sma50, mkt_cap)
     render_52week_range(price, week52_low, week52_high)
 
-    signal_label, signal_emoji, signal_color, explanation = get_signal(price, rsi, sma50, sma200)
-    render_analysis_box(price, rsi, sma50, sma200, signal_label, signal_emoji, signal_color, explanation)
+    signal_label, signal_emoji, signal_color, explanation, recommendation = get_signal(price, rsi, sma50, sma200)
+    render_analysis_box(price, rsi, sma50, sma200, signal_label, signal_emoji, signal_color, explanation, recommendation)
 
     render_chart(df, ticker)
     render_company_info(info)
