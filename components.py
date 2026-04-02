@@ -105,9 +105,10 @@ def render_topbar() -> tuple[list, str]:
         options=list(_EGX_TICKERS.keys()),
         default=["COMI.CA"],
         format_func=lambda x: f"{_EGX_TICKERS[x]} ({x.replace('.CA', '')})",
-        placeholder="Select EGX tickers…",
+        placeholder="Search by company name or ticker code…",
         label_visibility="collapsed",
-        help="First selected ticker drives the Stock Analysis tab. "
+        help="Search by company name (e.g., 'Commercial International') or ticker code (e.g., 'COMI'). "
+             "First selected ticker drives the Stock Analysis tab. "
              "All selected tickers appear in the Market Scanner.",
     )
 
