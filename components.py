@@ -246,7 +246,6 @@ def _add_volume_bars(fig: go.Figure, df) -> None:
 
 
 def _apply_dark_layout(fig: go.Figure, ticker: str) -> None:
-    axis_style = dict(titlefont=dict(color=YELLOW), tickfont=dict(color=TEXT), gridcolor="#2a2d35")
     fig.update_layout(
         template="plotly_dark",
         paper_bgcolor=DARK_BG,
@@ -256,10 +255,12 @@ def _apply_dark_layout(fig: go.Figure, ticker: str) -> None:
                     font=dict(color=TEXT)),
         xaxis_rangeslider_visible=False,
         margin=dict(l=10, r=10, t=60, b=10),
-        yaxis =dict(title="Price (EGP)", **axis_style),
-        yaxis2=dict(title="Volume",      **axis_style),
-        xaxis2=dict(tickfont=dict(color=TEXT), gridcolor="#2a2d35"),
     )
+    # Plotly 6.x requires update_xaxes/update_yaxes for subplot axes
+    fig.update_yaxes(titlefont=dict(color=YELLOW), tickfont=dict(color=TEXT), gridcolor="#2a2d35")
+    fig.update_xaxes(tickfont=dict(color=TEXT), gridcolor="#2a2d35")
+    fig.update_yaxes(title_text="Price (EGP)", row=1, col=1)
+    fig.update_yaxes(title_text="Volume",      row=2, col=1)
 
 
 # ─── Company Info Expander ────────────────────────────────────────────────────
