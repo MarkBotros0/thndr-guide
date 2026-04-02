@@ -43,31 +43,31 @@ def render_topbar() -> tuple[list, str, bool]:
     Inline control bar at the top of the main page.
     Returns (tickers, period, refresh_clicked).
     """
-    # Row 1: brand + refresh button
-    c_brand, c_btn = st.columns([4.5, 1.2])
-    with c_brand:
-        st.markdown(
-            f"<div style='padding-top:4px;'>"
-            f"<span style='color:{YELLOW}; font-size:1.15rem; font-weight:800; "
-            f"letter-spacing:-.02em;'>📊 Thndr Guide</span>"
-            f"<span style='color:#999; font-size:0.7rem; margin-left:10px;'>"
-            f"EGX Investment Companion</span>"
-            f"</div>",
-            unsafe_allow_html=True,
-        )
-    with c_btn:
-        refresh = st.button("🔄 Refresh Data", type="secondary", use_container_width=True)
-
-    # Row 2: ticker selector (full width)
-    tickers = st.multiselect(
-        "Tickers",
-        options=_EGX_TICKERS,
-        default=["COMI.CA"],
-        placeholder="Select EGX tickers…",
-        label_visibility="collapsed",
-        help="First selected ticker drives the Stock Analysis tab. "
-             "All selected tickers appear in the Market Scanner.",
+    # Row 1: brand (full width on mobile)
+    st.markdown(
+        f"<div style='padding-top:4px; margin-bottom:8px;'>"
+        f"<span style='color:{YELLOW}; font-size:1.15rem; font-weight:800; "
+        f"letter-spacing:-.02em;'>📊 Thndr Guide</span>"
+        f"<span style='color:#999; font-size:0.7rem; margin-left:10px;'>"
+        f"EGX Investment Companion</span>"
+        f"</div>",
+        unsafe_allow_html=True,
     )
+
+    # Row 2: ticker selector + refresh button
+    c_ticker, c_refresh = st.columns([3, 1])
+    with c_ticker:
+        tickers = st.multiselect(
+            "Tickers",
+            options=_EGX_TICKERS,
+            default=["COMI.CA"],
+            placeholder="Select EGX tickers…",
+            label_visibility="collapsed",
+            help="First selected ticker drives the Stock Analysis tab. "
+                 "All selected tickers appear in the Market Scanner.",
+        )
+    with c_refresh:
+        refresh = st.button("🔄 Refresh", type="secondary", use_container_width=True)
 
     # Row 3: period dropdown
     period = st.selectbox(
