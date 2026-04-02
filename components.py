@@ -257,7 +257,7 @@ def _apply_dark_layout(fig: go.Figure, ticker: str) -> None:
         margin=dict(l=10, r=10, t=60, b=10),
     )
     # Plotly 6.x requires update_xaxes/update_yaxes for subplot axes
-    fig.update_yaxes(titlefont=dict(color=YELLOW), tickfont=dict(color=TEXT), gridcolor="#2a2d35")
+    fig.update_yaxes(title_font=dict(color=YELLOW), tickfont=dict(color=TEXT), gridcolor="#2a2d35")
     fig.update_xaxes(tickfont=dict(color=TEXT), gridcolor="#2a2d35")
     fig.update_yaxes(title_text="Price (EGP)", row=1, col=1)
     fig.update_yaxes(title_text="Volume",      row=2, col=1)
