@@ -103,7 +103,7 @@ def render_topbar() -> tuple[list, str]:
     tickers = st.multiselect(
         "Tickers",
         options=list(_EGX_TICKERS.keys()),
-        default=["COMI.CA"],
+        default=list(_EGX_TICKERS.keys()),
         format_func=lambda x: f"{_EGX_TICKERS[x]} ({x.replace('.CA', '')})",
         placeholder="Search by company name or ticker code…",
         label_visibility="collapsed",
