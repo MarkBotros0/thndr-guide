@@ -517,7 +517,7 @@ def render_market_scanner(rows: list) -> None:
         return [""] * len(row)
 
     styled = df_display.style.apply(_highlight, axis=1)
-    st.dataframe(styled, use_container_width=True, hide_index=True)
+    st.dataframe(styled, width='stretch', hide_index=True)
 
 
 # ─── Footer Disclaimer ────────────────────────────────────────────────────────

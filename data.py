@@ -62,6 +62,8 @@ def fetch_scanner_data(tickers: list, period: str = "1y") -> tuple[list, list]:
     Return one summary dict per ticker for the Market Scanner table.
     Returns: (rows, errors) where errors is a list of error messages
     """
+    from config import RSI_OVERSOLD, RSI_OVERBOUGHT, NEAR_SMA200_PCT
+    
     rows = []
     errors = []
     for ticker in tickers:
@@ -73,13 +75,38 @@ def fetch_scanner_data(tickers: list, period: str = "1y") -> tuple[list, list]:
             if df_raw.empty or len(df_raw) < 2:
                 errors.append(f"{ticker}: Insufficient data (less than 2 data points)")
                 continue
+            
+            # Fetch company info for name
+            info = fetch_info(ticker)
+            company_name = info.get("longName", ticker.replace(".CA", ""))
+            
             df = compute_indicators(df_raw)
             latest     = df.iloc[-1]
             prev_close = df["Close"].iloc[-2]
             price      = float(latest["Close"])
             daily_chg  = (price - float(prev_close)) / float(prev_close) * 100
             rsi        = float(latest["RSI"])    if pd.notna(latest["RSI"])    else float("nan")
+            sma50      = float(latest["SMA50"])  if pd.notna(latest["SMA50"])  else float("nan")
             sma200     = float(latest["SMA200"]) if pd.notna(latest["SMA200"]) else float("nan")
+
+            # Calculate recommendation with reason
+            if not math.isnan(rsi) and not math.isnan(sma50) and not math.isnan(sma200):
+                near_sma200 = abs(price - sma200) / sma200 <= NEAR_SMA200_PCT
+                if rsi < RSI_OVERSOLD and near_sma200:
+                    recommendation = "✅ BUY"
+                    reason = f"Oversold (RSI {rsi:.1f}) near SMA-200 support"
+                elif rsi > RSI_OVERBOUGHT:
+                    recommendation = "🚫 NOT BUY"
+                    reason = f"Overbought (RSI {rsi:.1f}), potential pullback"
+                elif price > sma50:
+                    recommendation = "⏳ WAIT"
+                    reason = f"Uptrend but neutral RSI ({rsi:.1f})"
+                else:
+                    recommendation = "⏳ WAIT"
+                    reason = f"Below SMA-50, no clear signal"
+            else:
+                recommendation = "N/A"
+                reason = "Insufficient data for analysis"
 
             if not math.isnan(sma200):
                 pct = (price - sma200) / sma200 * 100
@@ -94,10 +121,13 @@ def fetch_scanner_data(tickers: list, period: str = "1y") -> tuple[list, list]:
 
             rows.append({
                 "Ticker":       ticker,
+                "Company":      company_name,
                 "Price (EGP)":  f"{price:,.2f}",
                 "Daily Change": f"{daily_chg:+.2f}%",
                 "RSI (14)":     f"{rsi:.1f}" if not math.isnan(rsi) else "N/A",
                 "vs SMA 200":   sma200_pos,
+                "Action":       recommendation,
+                "Reason":       reason,
                 "_rsi_raw":     rsi,
             })
         except Exception as e:

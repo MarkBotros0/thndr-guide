@@ -31,8 +31,8 @@ st.set_page_config(
 )
 st.markdown(THEME_CSS, unsafe_allow_html=True)
 
-# ── Auto-refresh every 3 seconds ─────────────────────────────────────────────
-AUTO_REFRESH_INTERVAL = 3  # 3 seconds
+# ── Auto-refresh every 60 seconds ────────────────────────────────────────────
+AUTO_REFRESH_INTERVAL = 60  # 60 seconds
 
 # Initialize last refresh time in session state
 if "last_refresh" not in st.session_state:
@@ -54,19 +54,7 @@ seconds_until = int(time_until_refresh)
 # ── Topbar controls ───────────────────────────────────────────────────────────
 tickers, period = render_topbar()
 
-# Show auto-refresh info
-st.markdown(
-    f"<div style='text-align:center; color:#666; font-size:0.7rem; margin-bottom:12px;'>"
-    f"📡 Auto-refresh in {seconds_until}s · Data updates every 3 seconds"
-    f"</div>",
-    unsafe_allow_html=True,
-)
-
 ticker = tickers[0] if tickers else "COMI.CA"
-
-# Trigger rerun after a short delay to update countdown
-time.sleep(1)
-st.rerun()
 
 # ── Tabs ──────────────────────────────────────────────────────────────────────
 tab_analysis, tab_scanner = st.tabs(["📈  Stock Analysis", "🔍  Market Scanner"])
@@ -81,9 +69,8 @@ with tab_analysis:
             f"Switch to the **Market Scanner** tab to compare all {len(tickers)} selected stocks."
         )
     
-    with st.spinner(f"Fetching data for {ticker}…"):
-        df_raw, error = fetch_history(ticker, period)
-        info   = fetch_info(ticker)
+    df_raw, error = fetch_history(ticker, period)
+    info   = fetch_info(ticker)
 
     if error:
         st.error(
@@ -135,19 +122,20 @@ with tab_scanner:
     if not tickers:
         st.info("📌 Select multiple tickers in the bar above to compare stocks side-by-side.")
     else:
-        with st.spinner(f"Scanning {len(tickers)} ticker(s)…"):
-            scanner_rows, errors = fetch_scanner_data(tickers, period)
+        scanner_rows, errors = fetch_scanner_data(tickers, period)
         
         if scanner_rows:
             st.success(f"✅ Successfully loaded {len(scanner_rows)} out of {len(tickers)} ticker(s)")
         
         if errors:
-            with st.expander(f"⚠️ {len(errors)} ticker(s) failed to load", expanded=False):
+            with st.expander(f"⚠️ {len(errors)} ticker(s) failed to load - Click to see details", expanded=False):
                 for error in errors:
                     st.warning(error)
         
         if scanner_rows:
             render_market_scanner(scanner_rows)
+        elif not errors:
+            st.info("Loading data...")
         else:
             st.error("No tickers could be loaded. Please check the ticker symbols and try again.")
         
