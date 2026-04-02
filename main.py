@@ -31,8 +31,8 @@ st.set_page_config(
 )
 st.markdown(THEME_CSS, unsafe_allow_html=True)
 
-# ── Auto-refresh every 5 minutes ──────────────────────────────────────────────
-AUTO_REFRESH_INTERVAL = 300  # 5 minutes in seconds
+# ── Auto-refresh every 3 seconds ─────────────────────────────────────────────
+AUTO_REFRESH_INTERVAL = 3  # 3 seconds
 
 # Initialize last refresh time in session state
 if "last_refresh" not in st.session_state:
@@ -49,8 +49,7 @@ if time_since_refresh >= AUTO_REFRESH_INTERVAL:
 
 # Calculate time until next refresh
 time_until_refresh = AUTO_REFRESH_INTERVAL - time_since_refresh
-minutes_until = int(time_until_refresh / 60)
-seconds_until = int(time_until_refresh % 60)
+seconds_until = int(time_until_refresh)
 
 # ── Topbar controls ───────────────────────────────────────────────────────────
 tickers, period = render_topbar()
@@ -58,7 +57,7 @@ tickers, period = render_topbar()
 # Show auto-refresh info
 st.markdown(
     f"<div style='text-align:center; color:#666; font-size:0.7rem; margin-bottom:12px;'>"
-    f"📡 Auto-refresh in {minutes_until}m {seconds_until}s · Data updates every 5 minutes"
+    f"📡 Auto-refresh in {seconds_until}s · Data updates every 3 seconds"
     f"</div>",
     unsafe_allow_html=True,
 )
