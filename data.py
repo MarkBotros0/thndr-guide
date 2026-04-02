@@ -6,15 +6,24 @@ import streamlit as st
 
 
 @st.cache_data(ttl=300, show_spinner=False)
-def fetch_history(ticker: str, period: str) -> pd.DataFrame:
-    """Download OHLCV history for an EGX ticker (.CA suffix required)."""
-    df = yf.Ticker(ticker).history(period=period, auto_adjust=True)
-    if df.empty:
-        return df
-    df = df[["Open", "High", "Low", "Close", "Volume"]]
-    df = df.ffill()
-    df.index = pd.to_datetime(df.index).tz_localize(None)
-    return df
+def fetch_history(ticker: str, period: str) -> tuple[pd.DataFrame, str | None]:
+    """
+    Download OHLCV history for an EGX ticker (.CA suffix required).
+    Returns: (dataframe, error_message)
+    """
+    try:
+        df = yf.Ticker(ticker).history(period=period, auto_adjust=True)
+        if df.empty:
+            return df, f"No price data found for {ticker}. The ticker may be delisted or unavailable."
+        df = df[["Open", "High", "Low", "Close", "Volume"]]
+        df = df.ffill()
+        df.index = pd.to_datetime(df.index).tz_localize(None)
+        return df, None
+    except Exception as e:
+        error_msg = str(e)
+        if "delisted" in error_msg.lower() or "not found" in error_msg.lower():
+            return pd.DataFrame(), f"{ticker} may be delisted or not found on Yahoo Finance."
+        return pd.DataFrame(), f"Error fetching {ticker}: {error_msg}"
 
 
 @st.cache_data(ttl=300, show_spinner=False)
@@ -48,13 +57,21 @@ def _rsi(series: pd.Series, length: int = 14) -> pd.Series:
     return 100 - (100 / (1 + rs))
 
 
-def fetch_scanner_data(tickers: list, period: str = "1y") -> list:
-    """Return one summary dict per ticker for the Market Scanner table."""
+def fetch_scanner_data(tickers: list, period: str = "1y") -> tuple[list, list]:
+    """
+    Return one summary dict per ticker for the Market Scanner table.
+    Returns: (rows, errors) where errors is a list of error messages
+    """
     rows = []
+    errors = []
     for ticker in tickers:
         try:
-            df_raw = fetch_history(ticker, period)
+            df_raw, error = fetch_history(ticker, period)
+            if error:
+                errors.append(error)
+                continue
             if df_raw.empty or len(df_raw) < 2:
+                errors.append(f"{ticker}: Insufficient data (less than 2 data points)")
                 continue
             df = compute_indicators(df_raw)
             latest     = df.iloc[-1]
@@ -83,6 +100,7 @@ def fetch_scanner_data(tickers: list, period: str = "1y") -> list:
                 "vs SMA 200":   sma200_pos,
                 "_rsi_raw":     rsi,
             })
-        except Exception:
+        except Exception as e:
+            errors.append(f"{ticker}: {str(e)}")
             continue
-    return rows
+    return rows, errors

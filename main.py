@@ -46,8 +46,16 @@ tab_analysis, tab_scanner = st.tabs(["📈  Stock Analysis", "🔍  Market Scann
 # ══════════════════════════════════════════════════════════════════════════════
 with tab_analysis:
     with st.spinner(f"Fetching data for {ticker}…"):
-        df_raw = fetch_history(ticker, period)
+        df_raw, error = fetch_history(ticker, period)
         info   = fetch_info(ticker)
+
+    if error:
+        st.error(
+            f"**{error}**\n\n"
+            "EGX tickers require the `.CA` suffix (e.g. `COMI.CA`). "
+            "If the ticker is correct, the stock may be delisted or Yahoo Finance may be temporarily unavailable."
+        )
+        st.stop()
 
     if df_raw.empty:
         st.error(
@@ -92,6 +100,12 @@ with tab_scanner:
         st.info("Select tickers in the bar above to populate the scanner.")
     else:
         with st.spinner(f"Scanning {len(tickers)} ticker(s)…"):
-            scanner_rows = fetch_scanner_data(tickers, period)
+            scanner_rows, errors = fetch_scanner_data(tickers, period)
+        
+        if errors:
+            with st.expander(f"⚠️ {len(errors)} ticker(s) failed to load", expanded=False):
+                for error in errors:
+                    st.warning(error)
+        
         render_market_scanner(scanner_rows)
         render_disclaimer()
