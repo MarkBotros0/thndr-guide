@@ -1,0 +1,84 @@
+"""
+Thndr Guide — Egyptian Exchange Investment Companion
+Entry point: wires together data, signals, and UI components.
+"""
+
+import pandas as pd
+import streamlit as st
+
+from config import THEME_CSS
+from data import fetch_history, fetch_info, compute_indicators
+from signals import get_signal
+from components import (
+    render_sidebar,
+    render_header,
+    render_metrics,
+    render_52week_range,
+    render_analysis_box,
+    render_chart,
+    render_company_info,
+    render_disclaimer,
+)
+
+# ── Must be the first Streamlit call ─────────────────────────────────────────
+st.set_page_config(
+    page_title="Thndr Guide",
+    page_icon="📈",
+    layout="wide",
+    initial_sidebar_state="expanded",
+)
+st.markdown(THEME_CSS, unsafe_allow_html=True)
+
+# ── Sidebar inputs ────────────────────────────────────────────────────────────
+ticker, period, refresh = render_sidebar()
+
+if refresh:
+    st.cache_data.clear()
+
+# ── Page header ───────────────────────────────────────────────────────────────
+render_header(ticker)
+
+# ── Fetch data ────────────────────────────────────────────────────────────────
+with st.spinner(f"Fetching data for {ticker}…"):
+    df_raw = fetch_history(ticker, period)
+    info   = fetch_info(ticker)
+
+if df_raw.empty:
+    st.error(
+        f"**No data found for `{ticker}`.**\n\n"
+        "EGX tickers require the `.CA` suffix (e.g. `COMI.CA`). "
+        "If the ticker is correct, Yahoo Finance may be temporarily unavailable — try refreshing."
+    )
+    st.stop()
+
+# ── Compute indicators ────────────────────────────────────────────────────────
+df = compute_indicators(df_raw)
+
+# ── Extract latest values ─────────────────────────────────────────────────────
+latest     = df.iloc[-1]
+prev_close = df["Close"].iloc[-2] if len(df) > 1 else latest["Close"]
+
+price        = float(latest["Close"])
+rsi          = float(latest["RSI"])    if pd.notna(latest["RSI"])    else float("nan")
+sma50        = float(latest["SMA50"])  if pd.notna(latest["SMA50"])  else float("nan")
+sma200       = float(latest["SMA200"]) if pd.notna(latest["SMA200"]) else float("nan")
+daily_change = (price - float(prev_close)) / float(prev_close) * 100
+
+week52_low  = info.get("fiftyTwoWeekLow",  float(df["Low"].min()))
+week52_high = info.get("fiftyTwoWeekHigh", float(df["High"].max()))
+mkt_cap     = info.get("marketCap")
+
+# ── Render page sections ──────────────────────────────────────────────────────
+render_metrics(price, daily_change, rsi, sma50, mkt_cap)
+render_52week_range(price, week52_low, week52_high)
+
+st.markdown("---")
+
+signal_label, signal_emoji, signal_color, explanation = get_signal(price, rsi, sma50, sma200)
+render_analysis_box(price, rsi, sma50, sma200, signal_label, signal_emoji, signal_color, explanation)
+
+st.markdown("---")
+
+render_chart(df, ticker)
+render_company_info(info)
+render_disclaimer()
