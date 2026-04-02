@@ -124,9 +124,6 @@ with tab_scanner:
     else:
         scanner_rows, errors = fetch_scanner_data(tickers, period)
         
-        if scanner_rows:
-            st.success(f"✅ Successfully loaded {len(scanner_rows)} out of {len(tickers)} ticker(s)")
-        
         if errors:
             with st.expander(f"⚠️ {len(errors)} ticker(s) failed to load - Click to see details", expanded=False):
                 for error in errors:

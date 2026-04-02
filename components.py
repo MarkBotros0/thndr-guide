@@ -298,17 +298,16 @@ def render_analysis_box(price: float, rsi: float, sma50: float, sma200: float,
           <div class="signal-badge"
                style="background:{badge_bg}; border:1px solid {badge_border};">
             <span style="font-size:2.2rem; line-height:1;">{signal_emoji}</span>
-            <div>
+            <div style="flex:1;">
               <div class="signal-title" style="color:{signal_color};">{signal_label}</div>
               <div class="signal-sub">RSI + Moving Average analysis</div>
             </div>
-          </div>
-
-          <div style="text-align:center; margin:1rem 0; padding:0.8rem; background:{_hex_to_rgba(rec_color, 0.15)}; border-radius:8px; border:1px solid {_hex_to_rgba(rec_color, 0.3)};">
-            <span style="font-size:1.1rem;">{rec_emoji}</span>
-            <span style="font-size:1.3rem; font-weight:600; color:{rec_color}; margin-left:0.5rem;">
-              {recommendation}
-            </span>
+            <div style="text-align:center; padding:0.5rem 1rem; background:{_hex_to_rgba(rec_color, 0.15)}; border-radius:8px; border:1px solid {_hex_to_rgba(rec_color, 0.3)};">
+              <span style="font-size:0.9rem;">{rec_emoji}</span>
+              <span style="font-size:1.1rem; font-weight:600; color:{rec_color}; margin-left:0.3rem;">
+                {recommendation}
+              </span>
+            </div>
           </div>
 
           <div class="indicator-row">
